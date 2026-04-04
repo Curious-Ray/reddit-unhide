@@ -1,0 +1,8 @@
+﻿src/api/client.ts(1,54): error TS6133: 'ApiMessageRequest' is declared but its value is never read.
+src/background/index.ts(28,67): error TS6133: 'sender' is declared but its value is never read.
+src/components/App.tsx(1,8): error TS6133: 'React' is declared but its value is never read.
+src/components/CommentCard.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+src/components/HiddenProfileFeed.tsx(1,8): error TS6133: 'React' is declared but its value is never read.
+src/components/PostCard.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+src/components/ProfileHeader.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+src/content/index.tsx(1,1): error TS6133: 'React' is declared but its value is never read.

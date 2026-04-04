@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Reddit Profile Unhider",
+  "version": "1.0.0",
+  "description": "Reveals hidden Reddit user profiles.",
+  "host_permissions": [
+    "*://*.reddit.com/*",
+    "https://arctic-shift.photon-reddit.com/*"
+  ],
+  "background": {
+    "service_worker": "src/background/index.ts",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*.reddit.com/user/*"],
+      "js": ["src/content/index.tsx"]
+    }
+  ]
+}
