@@ -6,12 +6,18 @@ import CommentCard from './CommentCard';
 
 type TabType = 'Overview' | 'Posts' | 'Comments';
 
+function getTabFromPath(path: string): TabType {
+  if (path.includes('/submitted')) return 'Posts';
+  if (path.includes('/comments')) return 'Comments';
+  return 'Overview';
+}
+
 export default function HiddenProfileFeed({ username }: { username: string }) {
-  const [activeTab, setActiveTab] = useState<TabType>('Overview');
-  
+  const [activeTab, setActiveTab] = useState<TabType>(() => getTabFromPath(window.location.pathname));
+
   const [posts, setPosts] = useState<RedditPost[]>([]);
   const [comments, setComments] = useState<RedditComment[]>([]);
-  
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -20,6 +26,25 @@ export default function HiddenProfileFeed({ username }: { username: string }) {
 
   const [hasMorePosts, setHasMorePosts] = useState(true);
   const [hasMoreComments, setHasMoreComments] = useState(true);
+
+  // Keep activeTab in sync if user clicks Reddit's own native tabs (SPA navigation)
+  useEffect(() => {
+    const syncTab = () => {
+      const newTab = getTabFromPath(window.location.pathname);
+      setActiveTab(newTab);
+    };
+    window.addEventListener('popstate', syncTab);
+    // Reddit uses pushState for SPA navigation — patch it once
+    const origPushState = history.pushState.bind(history);
+    history.pushState = (...args) => {
+      origPushState(...args);
+      syncTab();
+    };
+    return () => {
+      window.removeEventListener('popstate', syncTab);
+      history.pushState = origPushState;
+    };
+  }, []);
 
   const fetchPosts = async (before?: number) => {
     if (!hasMorePosts && before) return;
@@ -45,17 +70,23 @@ export default function HiddenProfileFeed({ username }: { username: string }) {
     }
   };
 
-  const loadData = async (isLoadMore = false) => {
+  const loadData = async (tab: TabType, isLoadMore = false) => {
     setLoading(true);
     setError(null);
     if (!isLoadMore) {
-      await Promise.all([fetchPosts(), fetchComments()]);
+      if (tab === 'Posts') {
+        await fetchPosts();
+      } else if (tab === 'Comments') {
+        await fetchComments();
+      } else {
+        await Promise.all([fetchPosts(), fetchComments()]);
+      }
     } else {
-      let promises = [];
-      if (activeTab === 'Posts' || activeTab === 'Overview') {
+      const promises = [];
+      if (tab === 'Posts' || tab === 'Overview') {
         if (hasMorePosts) promises.push(fetchPosts(postsBefore));
       }
-      if (activeTab === 'Comments' || activeTab === 'Overview') {
+      if (tab === 'Comments' || tab === 'Overview') {
         if (hasMoreComments) promises.push(fetchComments(commentsBefore));
       }
       await Promise.all(promises);
@@ -63,9 +94,22 @@ export default function HiddenProfileFeed({ username }: { username: string }) {
     setLoading(false);
   };
 
+  // Initial fetch based on URL-derived tab
   useEffect(() => {
-    loadData();
+    loadData(activeTab);
   }, [username]);
+
+  // When tab changes due to URL navigation, fetch missing data
+  useEffect(() => {
+    const needsPosts = activeTab === 'Posts' || activeTab === 'Overview';
+    const needsComments = activeTab === 'Comments' || activeTab === 'Overview';
+    const missingPosts = needsPosts && posts.length === 0 && hasMorePosts;
+    const missingComments = needsComments && comments.length === 0 && hasMoreComments;
+
+    if (missingPosts || missingComments) {
+      loadData(activeTab);
+    }
+  }, [activeTab]);
 
   const allItems = [...posts, ...comments].sort((a, b) => b.created_utc - a.created_utc);
 
@@ -74,30 +118,17 @@ export default function HiddenProfileFeed({ username }: { username: string }) {
   else if (activeTab === 'Comments') displayItems = comments;
   else displayItems = allItems;
 
-  const handleLoadMore = () => loadData(true);
-
-  const canLoadMore = activeTab === 'Posts' ? hasMorePosts : 
-                      activeTab === 'Comments' ? hasMoreComments : 
-                      (hasMorePosts || hasMoreComments);
+  const canLoadMore =
+    activeTab === 'Posts' ? hasMorePosts :
+    activeTab === 'Comments' ? hasMoreComments :
+    (hasMorePosts || hasMoreComments);
 
   return (
-    <div className="feed-container">
-      <div className="tabs-container">
-        {(['Overview', 'Posts', 'Comments'] as TabType[]).map(tab => (
-          <button 
-            key={tab} 
-            className={`tab-btn ${activeTab === tab ? 'active' : ''}`}
-            onClick={() => setActiveTab(tab)}
-          >
-            {tab}
-          </button>
-        ))}
-      </div>
+    <div>
+      {error && <div style={{ padding: '24px', color: 'red' }}>Error: {error}</div>}
 
-      {error && <div className="error-state">Error: {error}</div>}
-      
       {!loading && !error && displayItems.length === 0 && (
-        <div className="empty-state">No activity found.</div>
+        <div style={{ padding: '24px', color: 'var(--color-neutral-content-weak)' }}>No activity found.</div>
       )}
 
       {displayItems.map(item => {
@@ -109,14 +140,11 @@ export default function HiddenProfileFeed({ username }: { username: string }) {
       })}
 
       {loading && (
-        <>
-          <div className="skeleton-box"><div className="skeleton-line" style={{ width: '40%' }}></div><div className="skeleton-line"></div><div className="skeleton-line" style={{ width: '80%' }}></div></div>
-          <div className="skeleton-box"><div className="skeleton-line" style={{ width: '30%' }}></div><div className="skeleton-line"></div></div>
-        </>
+        <div style={{ padding: '24px', color: 'var(--color-neutral-content-weak)' }}>Loading...</div>
       )}
 
       {!loading && !error && canLoadMore && displayItems.length > 0 && (
-        <button className="load-more-btn" onClick={handleLoadMore}>
+        <button className="unhider-load-more" onClick={() => loadData(activeTab, true)}>
           Load More
         </button>
       )}

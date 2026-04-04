@@ -1,0 +1,2 @@
+src/components/CommentCard.tsx(32,89): error TS2783: 'color' is specified more than once, so this usage will be overwritten.
+src/components/PostCard.tsx(25,86): error TS2783: 'color' is specified more than once, so this usage will be overwritten.

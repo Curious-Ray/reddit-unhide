@@ -14,23 +14,27 @@ function mountReactApp(targetElement: Element) {
   const username = getUsername();
   if (!username) return;
 
+  let emptyStateWrapper: HTMLElement | null = targetElement as HTMLElement;
+  for (let i = 0; i < 4; i++) {
+    if (emptyStateWrapper?.parentElement && emptyStateWrapper.parentElement.tagName.toLowerCase() !== 'body') {
+      emptyStateWrapper = emptyStateWrapper.parentElement;
+    }
+  }
+
+  let insertPoint = targetElement;
+  if (emptyStateWrapper) {
+    emptyStateWrapper.style.display = 'none';
+    insertPoint = emptyStateWrapper;
+  }
+
   const container = document.createElement('div');
   container.id = 'reddit-unhide-root';
-  container.style.marginTop = '20px';
   container.style.width = '100%';
+  container.style.marginTop = '12px';
   
-  targetElement.parentNode?.insertBefore(container, targetElement.nextSibling);
+  insertPoint.parentNode?.insertBefore(container, insertPoint.nextSibling);
 
-  const shadowRoot = container.attachShadow({ mode: 'open' });
-  
-  const styleElement = document.createElement('style');
-  styleElement.textContent = styleContent;
-  shadowRoot.appendChild(styleElement);
-
-  const reactRootDiv = document.createElement('div');
-  shadowRoot.appendChild(reactRootDiv);
-
-  const root = createRoot(reactRootDiv);
+  const root = createRoot(container);
   root.render(<App username={username} />);
 }
 
