@@ -30,7 +30,9 @@ function mountReactApp(targetElement: Element) {
   const container = document.createElement('div');
   container.id = 'reddit-unhide-root';
   container.style.width = '100%';
-  container.style.marginTop = '12px';
+  // Reddit puts a lot of native padding/margins on that empty state container's parent
+  // We can offset it with a negative margin to pull the feed higher up! 
+  container.style.marginTop = '-100px'; 
   
   insertPoint.parentNode?.insertBefore(container, insertPoint.nextSibling);
 
@@ -55,7 +57,7 @@ function checkForHiddenMessage() {
 
   console.log('[Reddit Unhider] Scanning for hidden profile message...');
   
-  const searchStr = "likes to keep their posts hidden";
+  const searchStr = "likes to keep their";
   const targetNode = findDeepestNodeWithText(searchStr);
   
   if (targetNode) {
@@ -71,9 +73,27 @@ let scanningInterval = setInterval(() => {
   checkForHiddenMessage();
 }, 2000);
 
-// Also use a more robust MutationObserver
-const observer = new MutationObserver(() => {
+const evaluateProfileMounting = () => {
+  // If not on user profile, remove root
+  if (!window.location.pathname.includes('/user/')) {
+    const root = document.getElementById('reddit-unhide-root');
+    if (root) root.remove();
+    return;
+  }
+  
   checkForHiddenMessage();
+};
+
+// Observe the DOM for the hidden message or SPA navigation
+const observer = new MutationObserver(() => {
+  evaluateProfileMounting();
+});
+
+// Chrome extension SPA listener
+chrome.runtime.onMessage.addListener((request) => {
+  if (request.action === 'SPA_NAVIGATED') {
+    setTimeout(evaluateProfileMounting, 200);
+  }
 });
 
 if (document.body) {

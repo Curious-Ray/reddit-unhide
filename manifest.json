@@ -7,14 +7,15 @@
     "*://*.reddit.com/*",
     "https://arctic-shift.photon-reddit.com/*"
   ],
+  "permissions": ["storage", "webNavigation"],
   "background": {
     "service_worker": "src/background/index.ts",
     "type": "module"
   },
   "content_scripts": [
     {
-      "matches": ["*://*.reddit.com/user/*"],
-      "js": ["src/content/index.tsx"]
+      "matches": ["*://*.reddit.com/*"],
+      "js": ["src/content/index.tsx", "src/content/post-injector.tsx"]
     }
   ]
 }

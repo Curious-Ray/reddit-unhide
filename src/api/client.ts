@@ -31,5 +31,13 @@ export const apiClient = {
          else reject(new Error(response?.error || 'Unknown error'));
       });
     });
+  },
+  getInfo: (ids: string[]): Promise<any[]> => {
+    return new Promise((resolve, reject) => {
+      chrome.runtime.sendMessage({ action: 'GET_INFO', username: '', ids }, (response) => {
+         if (response?.success) resolve(extractData(response.data));
+         else reject(new Error(response?.error || 'Unknown error'));
+      });
+    });
   }
 };

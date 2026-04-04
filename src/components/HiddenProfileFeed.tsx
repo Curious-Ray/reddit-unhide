@@ -63,6 +63,25 @@ export default function HiddenProfileFeed({ username }: { username: string }) {
     try {
       const data = await apiClient.getComments(username, before);
       if (data.length === 0) setHasMoreComments(false);
+
+      const fetchParentIds = data.map(c => c.parent_id).filter(id => id && id.startsWith('t1_'));
+      const uniqueParentIds = Array.from(new Set(fetchParentIds));
+      if (uniqueParentIds.length > 0) {
+        try {
+          const parentData = await apiClient.getInfo(uniqueParentIds);
+          const authorMap: Record<string, string> = {};
+          parentData.forEach((p: any) => {
+             authorMap[p.name] = p.author;
+          });
+          
+          data.forEach(c => {
+             if (c.parent_id && authorMap[c.parent_id]) {
+                c.parent_author = authorMap[c.parent_id];
+             }
+          });
+        } catch (e) { console.error('Failed to fetch parent authors', e); }
+      }
+
       setComments(prev => before ? [...prev, ...data] : data);
       if (data.length > 0) setCommentsBefore(data[data.length - 1].created_utc);
     } catch (err: any) {
@@ -125,6 +144,15 @@ export default function HiddenProfileFeed({ username }: { username: string }) {
 
   return (
     <div>
+      <div style={{
+        padding: '12px 16px', borderBottom: '1px solid var(--color-neutral-border-weak, #34454d)', backgroundColor: 'rgba(255, 69, 0, 0.05)'
+      }}>
+        <h2 style={{ color: '#ff4500', margin: 0, fontSize: '12px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+          Hidden profile activity shown by Reddit Unhider
+        </h2>
+      </div>
+
       {error && <div style={{ padding: '24px', color: 'red' }}>Error: {error}</div>}
 
       {!loading && !error && displayItems.length === 0 && (
