@@ -84,9 +84,47 @@ const evaluateProfileMounting = () => {
   checkForHiddenMessage();
 };
 
+function nukeNativeSortAndFeedOptions() {
+  // Only nuke if we are currently overriding the feed
+  if (!document.getElementById('reddit-unhide-root')) return;
+
+  const selectors = [
+    'shreddit-feed-options',
+    'shreddit-sort-dropdown',
+    'shreddit-async-loader[bundlename="shreddit_sort_dropdown"]',
+    'shreddit-async-loader[bundlename="shreddit_feed_options"]',
+    '#profile-feed-options-container',
+    '#sort-dropdown-container',
+    'faceplate-tracker[data-testid="post-sort-button"]',
+    'faceplate-tracker[data-testid="feed-options-button"]',
+    'button[aria-controls*="feed-options"]',
+    'button[aria-controls*="sort-dropdown"]',
+    '[data-testid="post-sort-button"]',
+    '[data-testid="feed-options-button"]',
+    'shreddit-layout-event-setter rpl-dropdown',
+    'div[data-faceplate-tracking-context*="feed_options"]',
+    'rpl-dropdown[data-faceplate-tracking-context*="feed_options"]'
+  ];
+
+  selectors.forEach(selector => {
+    document.querySelectorAll(selector).forEach((el: any) => {
+      // Find the outermost padding container to clean up the space completely
+      let targetElement = el;
+      if (el.tagName.toLowerCase() === 'rpl-dropdown' && el.parentElement && el.parentElement.parentElement) {
+          targetElement = el.parentElement.parentElement;
+      }
+      
+      if (targetElement.style.display !== 'none') {
+        targetElement.style.display = 'none';
+      }
+    });
+  });
+}
+
 // Observe the DOM for the hidden message or SPA navigation
 const observer = new MutationObserver(() => {
   evaluateProfileMounting();
+  nukeNativeSortAndFeedOptions();
 });
 
 // Chrome extension SPA listener

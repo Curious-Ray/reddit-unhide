@@ -83,9 +83,16 @@ function CommentNode({ node }: { node: any }) {
         {/* Header */}
         <div style={{ fontSize: '12px', color: 'var(--color-neutral-content-weak)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
           <a 
-            href={`https://reddit.com/user/${node.author}`} 
-            style={{ fontWeight: 'bold', color: 'var(--color-neutral-content-strong)', textDecoration: 'none' }}
-            target="_blank" 
+            href={node.author === '[deleted]' ? undefined : `https://reddit.com/user/${node.author}`} 
+            style={{ 
+              fontWeight: 'bold', 
+              color: 'var(--color-neutral-content-strong)', 
+              textDecoration: 'none',
+              cursor: node.author === '[deleted]' ? 'default' : 'pointer'
+            }}
+            onMouseEnter={e => { if (node.author !== '[deleted]') e.currentTarget.style.color = '#24a0ed'; }}
+            onMouseLeave={e => { if (node.author !== '[deleted]') e.currentTarget.style.color = 'var(--color-neutral-content-strong)'; }}
+            target={node.author === '[deleted]' ? undefined : "_blank"}
             rel="noreferrer"
           >
             {node.author}
@@ -125,7 +132,14 @@ function ArchivedPostBody({ postData }: { postData: any }) {
       </h2>
       <h1 style={{ fontSize: '20px', margin: '0 0 8px 0', color: 'var(--color-neutral-content-strong)' }}>{postData.title}</h1>
       <div style={{ fontSize: '12px', color: 'var(--color-neutral-content-weak)', marginBottom: '12px' }}>
-         Posted by <span style={{ fontWeight: 'bold', color: 'var(--color-neutral-content-strong)' }}>{postData.author}</span> • {new Date(postData.created_utc * 1000).toLocaleString()}
+         Posted by <a 
+           href={postData.author === '[deleted]' ? undefined : `https://reddit.com/user/${postData.author}`}
+           style={{ fontWeight: 'bold', color: 'var(--color-neutral-content-strong)', textDecoration: 'none', cursor: postData.author === '[deleted]' ? 'default' : 'pointer' }}
+           onMouseEnter={e => { if (postData.author !== '[deleted]') e.currentTarget.style.color = '#24a0ed'; }}
+           onMouseLeave={e => { if (postData.author !== '[deleted]') e.currentTarget.style.color = 'var(--color-neutral-content-strong)'; }}
+           target={postData.author === '[deleted]' ? undefined : "_blank"}
+           rel="noreferrer"
+         >{postData.author}</a> • {new Date(postData.created_utc * 1000).toLocaleString()}
       </div>
       {postData.selftext && (
         <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(postData.selftext_html || (postData.selftext ? postData.selftext.replace(/\n/g, '<br/>') : '')) }} style={{ fontSize: '14px', lineHeight: '1.4', wordBreak: 'break-word', whiteSpace: 'normal' }} />
@@ -175,14 +189,6 @@ function MainInjectorController({ postId }: { postId: string }) {
       const localStr = window.localStorage.getItem(`unhide_post_${postId}`);
       if (localStr) setPostData(JSON.parse(localStr));
     } catch(e) {}
-    
-    if (chrome.storage && chrome.storage.local) {
-      chrome.storage.local.get([`unhide_post_${postId}`], (result) => {
-        if (result && result[`unhide_post_${postId}`]) {
-          setPostData(result[`unhide_post_${postId}`]);
-        }
-      });
-    }
 
     chrome.runtime.sendMessage({ action: 'GET_COMMENTS', postId }, (response) => {
       if (response && response.success && response.data) {

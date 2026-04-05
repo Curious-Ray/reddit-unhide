@@ -58,6 +58,22 @@ export default function App({ username }: { username: string }) {
         .unhider-load-more:hover {
           background: var(--color-neutral-background-selected);
         }
+
+        /* Hide Reddit's native sorting and feed options on hidden profiles */
+        shreddit-feed-options,
+        shreddit-sort-dropdown,
+        shreddit-async-loader[bundlename="shreddit_sort_dropdown"],
+        shreddit-async-loader[bundlename="shreddit_feed_options"],
+        #profile-feed-options-container,
+        #sort-dropdown-container,
+        faceplate-dropdown-menu[id*="sort"],
+        faceplate-dropdown-menu[id*="feed_options"],
+        div:has(> shreddit-feed-options),
+        div:has(> shreddit-sort-dropdown),
+        button[aria-controls*="feed-options"],
+        button[aria-controls*="sort-dropdown"] {
+          display: none !important;
+        }
       `}</style>
       <div style={{ width: '100%' }}>
         <HiddenProfileFeed username={username} />

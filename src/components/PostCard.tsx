@@ -27,9 +27,6 @@ export default function PostCard({ post, username }: { post: RedditPost, usernam
          try {
            window.localStorage.setItem(`unhide_post_${post.id}`, JSON.stringify(post));
          } catch (err) {}
-         if (chrome.storage && chrome.storage.local) {
-           chrome.storage.local.set({ [`unhide_post_${post.id}`]: post });
-         }
          
          window.location.href = `https://reddit.com${post.permalink}`;
       }}
@@ -59,9 +56,6 @@ export default function PostCard({ post, username }: { post: RedditPost, usernam
                try {
                  window.localStorage.setItem(`unhide_post_${post.id}`, JSON.stringify(post));
                } catch (err) {}
-               if (chrome.storage && chrome.storage.local) {
-                 chrome.storage.local.set({ [`unhide_post_${post.id}`]: post });
-               }
             }}
           >
             {post.title}

@@ -9,6 +9,7 @@
   ],
   "permissions": ["storage", "webNavigation"],
   "background": {
+    "scripts": ["src/background/index.ts"],
     "service_worker": "src/background/index.ts",
     "type": "module"
   },
