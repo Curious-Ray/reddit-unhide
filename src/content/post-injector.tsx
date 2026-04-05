@@ -190,7 +190,7 @@ function MainInjectorController({ postId }: { postId: string }) {
       if (localStr) setPostData(JSON.parse(localStr));
     } catch(e) {}
 
-    chrome.runtime.sendMessage({ action: 'GET_COMMENTS', postId }, (response) => {
+    chrome.runtime.sendMessage({ action: 'GET_COMMENTS', postId }, (response: any) => {
       if (response && response.success && response.data) {
         const arr = Array.isArray(response.data) ? response.data : (response.data.data || []);
         setCommentsData(arr);
@@ -337,7 +337,7 @@ function initInjector() {
   }
 
   // Listen to background script for SPA navigation events
-  chrome.runtime.onMessage.addListener((request) => {
+  chrome.runtime.onMessage.addListener((request: any) => {
     if (request.action === 'SPA_NAVIGATED') {
       setTimeout(attemptInjection, 200);
     }

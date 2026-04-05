@@ -128,7 +128,7 @@ const observer = new MutationObserver(() => {
 });
 
 // Chrome extension SPA listener
-chrome.runtime.onMessage.addListener((request) => {
+chrome.runtime.onMessage.addListener((request: any) => {
   if (request.action === 'SPA_NAVIGATED') {
     setTimeout(evaluateProfileMounting, 200);
   }
