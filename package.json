@@ -1,7 +1,7 @@
 {
-  "name": "reddit-unhide",
+  "name": "reddit-unhider",
   "version": "1.0.0",
-  "description": "Chrome Extension to reveal hidden Reddit profiles",
+  "description": "Seamlessly explore hidden user profiles, read deleted comments, and view removed posts natively within the Reddit interface.",
   "type": "module",
   "scripts": {
     "dev": "vite",
