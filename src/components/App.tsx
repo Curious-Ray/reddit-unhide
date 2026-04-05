@@ -17,14 +17,14 @@ export default function App({ username }: { username: string }) {
           display: flex;
           gap: 8px;
           margin-bottom: 0px;
-          border-bottom: 1px solid var(--color-neutral-border-weak, #34454d);
+          border-bottom: 1px solid var(--color-neutral-border-weak);
           padding-bottom: 12px;
           margin-top: 12px;
         }
         .unhider-pill {
           background: transparent;
           border: none;
-          color: var(--color-neutral-content-weak, #8da4ae);
+          color: var(--color-neutral-content-weak);
           padding: 8px 16px;
           border-radius: 999px;
           font-weight: 600;
@@ -33,25 +33,30 @@ export default function App({ username }: { username: string }) {
           transition: background 0.1s, color 0.1s;
         }
         .unhider-pill:hover {
-          background: var(--color-neutral-background-hover, #2a3236);
+          background: var(--color-neutral-background-hover);
         }
         .unhider-pill.active {
-          background: var(--color-neutral-background-selected, #333d42);
-          color: var(--color-neutral-content-strong, #f2f4f5);
+          background: var(--color-neutral-background-selected);
+          color: var(--color-neutral-content-strong);
         }
         .unhider-load-more {
-          width: 100%;
+          width: calc(100% - 32px);
           padding: 12px;
-          margin-top: 16px;
+          margin: 24px 16px;
           border-radius: 999px;
-          background: var(--color-neutral-background-hover, #2a3236);
-          color: var(--color-neutral-content-strong, #f2f4f5);
+          background: var(--color-neutral-background-hover);
+          color: var(--color-neutral-content-strong);
           border: none;
           font-weight: 600;
           cursor: pointer;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 40px;
+          line-height: 1;
         }
         .unhider-load-more:hover {
-          background: var(--color-neutral-background-selected, #333d42);
+          background: var(--color-neutral-background-selected);
         }
       `}</style>
       <div style={{ width: '100%' }}>

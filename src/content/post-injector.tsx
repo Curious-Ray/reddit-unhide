@@ -1,15 +1,29 @@
 import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
+import DOMPurify from 'dompurify';
 
 function getPostIdFromUrl() {
   const match = window.location.pathname.match(/\/comments\/([a-zA-Z0-9]+)\//);
   return match ? match[1] : null;
 }
 
+const authorAvatarMap = new Map<string, number>();
+let nextAvatarId = 0;
+
+function getAvatarIndex(str: string) {
+  if (!str) return 0;
+  if (!authorAvatarMap.has(str)) {
+    authorAvatarMap.set(str, nextAvatarId);
+    nextAvatarId = (nextAvatarId + 1) % 8; // Cycles 0 through 7 for diverse colors
+  }
+  return authorAvatarMap.get(str);
+}
+
 function CommentNode({ node }: { node: any }) {
   const [collapsed, setCollapsed] = useState(false);
-  // Default reddit avatar if arctic doesn't have one
-  const avatarUrl = "https://www.redditstatic.com/avatars/defaults/v2/avatar_default_2.png";
+  const avatarIndex = getAvatarIndex(node.author);
+  // Dynamic reddit avatar based on username hash
+  const avatarUrl = `https://www.redditstatic.com/avatars/defaults/v2/avatar_default_${avatarIndex}.png`;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'row', marginTop: '16px' }}>
@@ -18,7 +32,7 @@ function CommentNode({ node }: { node: any }) {
         {collapsed ? (
           <div 
             onClick={() => setCollapsed(false)}
-            style={{ width: '24px', height: '24px', borderRadius: '50%', backgroundColor: '#2a3236', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#f2f4f5', cursor: 'pointer', fontSize: '18px', lineHeight: '1' }}
+            style={{ width: '24px', height: '24px', borderRadius: '50%', backgroundColor: 'var(--color-neutral-background-hover)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-neutral-content-strong)', cursor: 'pointer', fontSize: '18px', lineHeight: '1' }}
             title="Expand"
           >
             +
@@ -28,7 +42,7 @@ function CommentNode({ node }: { node: any }) {
         )}
         {!collapsed && (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexGrow: 1, width: '100%', marginTop: '4px' }}>
-             <div style={{ width: '2px', height: '16px', backgroundColor: '#34454d' }} />
+             <div style={{ width: '2px', height: '16px', backgroundColor: 'var(--color-neutral-border-weak)' }} />
              <div 
                onClick={() => setCollapsed(true)} 
                style={{ 
@@ -36,12 +50,12 @@ function CommentNode({ node }: { node: any }) {
                  width: '16px', 
                  height: '16px', 
                  borderRadius: '50%', 
-                 border: '1px solid #34454d', 
+                 border: '1px solid var(--color-neutral-border-weak)', 
                  display: 'flex', 
                  alignItems: 'center', 
                  justifyContent: 'center', 
-                 backgroundColor: '#1a282d',
-                 color: '#f2f4f5',
+                 backgroundColor: 'var(--color-neutral-background)',
+                 color: 'var(--color-neutral-content-strong)',
                  zIndex: 1
                }}
                title="Collapse"
@@ -51,14 +65,14 @@ function CommentNode({ node }: { node: any }) {
              <div style={{ 
                flexGrow: 1, 
                width: '2px', 
-               backgroundColor: '#34454d',
+               backgroundColor: 'var(--color-neutral-border-weak)',
                cursor: 'pointer',
                transition: 'background-color 0.2s',
                marginTop: '-1px'
              }} 
              onClick={() => setCollapsed(true)}
-             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f2f4f5')}
-             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#34454d')}
+             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-neutral-content-strong)')}
+             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-neutral-border-weak)')}
              />
           </div>
         )}
@@ -67,10 +81,10 @@ function CommentNode({ node }: { node: any }) {
       {/* Main Content */}
       <div style={{ flexGrow: 1, overflow: 'hidden' }}>
         {/* Header */}
-        <div style={{ fontSize: '12px', color: '#8da4ae', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <div style={{ fontSize: '12px', color: 'var(--color-neutral-content-weak)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
           <a 
             href={`https://reddit.com/user/${node.author}`} 
-            style={{ fontWeight: 'bold', color: '#f2f4f5', textDecoration: 'none' }}
+            style={{ fontWeight: 'bold', color: 'var(--color-neutral-content-strong)', textDecoration: 'none' }}
             target="_blank" 
             rel="noreferrer"
           >
@@ -83,7 +97,7 @@ function CommentNode({ node }: { node: any }) {
         {!collapsed && (
           <>
             {/* Body */}
-            <div style={{ color: '#f2f4f5', fontSize: '14px', lineHeight: '1.4', marginBottom: '8px', overflowWrap: 'break-word', wordBreak: 'break-word' }} dangerouslySetInnerHTML={{ __html: node.body_html || `<p>${node.body}</p>` }} />
+            <div style={{ color: 'var(--color-neutral-content-strong)', fontSize: '14px', lineHeight: '1.4', marginBottom: '8px', wordBreak: 'break-word', overflowWrap: 'break-word', whiteSpace: 'normal' }} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(node.body_html || (node.body ? node.body.replace(/\n/g, '<br/>') : '')) }} />
             
             {/* Children container */}
             <div style={{ marginTop: '0px' }}>
@@ -103,18 +117,18 @@ function ArchivedPostBody({ postData }: { postData: any }) {
   return (
     <div style={{
       margin: '16px 0', padding: '16px', border: '1px solid rgba(255, 69, 0, 0.4)',
-      borderRadius: '8px', backgroundColor: 'rgba(255, 255, 255, 0.03)', color: '#f2f4f5'
+      borderRadius: '8px', backgroundColor: 'var(--color-neutral-background-weak)', color: 'var(--color-neutral-content-strong)'
     }}>
-      <h2 style={{ color: '#ff4500', marginTop: 0, fontSize: '12px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px' }}>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-        Archived post shown by Reddit Unhider
+      <h2 style={{ color: 'var(--color-neutral-content-strong)', marginTop: 0, fontSize: '12px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <svg style={{ color: '#ff4500' }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+        <span>Deleted post shown by <span style={{ color: '#ff4500' }}>Reddit Unhider</span></span>
       </h2>
-      <h1 style={{ fontSize: '20px', margin: '0 0 8px 0', color: '#f2f4f5' }}>{postData.title}</h1>
-      <div style={{ fontSize: '12px', color: '#8da4ae', marginBottom: '12px' }}>
-         Posted by <span style={{ fontWeight: 'bold', color: '#f2f4f5' }}>{postData.author}</span> • {new Date(postData.created_utc * 1000).toLocaleString()}
+      <h1 style={{ fontSize: '20px', margin: '0 0 8px 0', color: 'var(--color-neutral-content-strong)' }}>{postData.title}</h1>
+      <div style={{ fontSize: '12px', color: 'var(--color-neutral-content-weak)', marginBottom: '12px' }}>
+         Posted by <span style={{ fontWeight: 'bold', color: 'var(--color-neutral-content-strong)' }}>{postData.author}</span> • {new Date(postData.created_utc * 1000).toLocaleString()}
       </div>
       {postData.selftext && (
-        <div dangerouslySetInnerHTML={{ __html: postData.selftext }} style={{ fontSize: '14px', lineHeight: '1.4' }} />
+        <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(postData.selftext_html || (postData.selftext ? postData.selftext.replace(/\n/g, '<br/>') : '')) }} style={{ fontSize: '14px', lineHeight: '1.4', wordBreak: 'break-word', whiteSpace: 'normal' }} />
       )}
     </div>
   );
@@ -141,11 +155,11 @@ function ArchivedCommentsView({ postId, commentsData }: { postId: string, commen
   return (
     <div style={{
       margin: '16px 0', padding: '16px', border: '1px solid rgba(255, 69, 0, 0.4)',
-      borderRadius: '8px', backgroundColor: 'rgba(255, 255, 255, 0.03)', color: '#f2f4f5'
+      borderRadius: '8px', backgroundColor: 'var(--color-neutral-background-weak)', color: 'var(--color-neutral-content-strong)'
     }}>
-      <h2 style={{ color: '#ff4500', margin: '0 0 12px 0', fontSize: '12px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px' }}>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-        {commentsData.length} archived comments shown by Reddit Unhider
+      <h2 style={{ color: 'var(--color-neutral-content-strong)', margin: '0 0 12px 0', fontSize: '12px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <svg style={{ color: '#ff4500' }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+        <span>{commentsData.length} deleted comments shown by <span style={{ color: '#ff4500' }}>Reddit Unhider</span></span>
       </h2>
       {roots.map(root => <CommentNode key={root.id} node={root} />)}
     </div>

@@ -7,10 +7,23 @@ let rateLimitResetTime = 0;
 
 async function fetchWithRateLimit(url: string) {
   if (rateLimitRemaining < 5 && Date.now() < rateLimitResetTime) {
-    throw new Error('Rate limit exceeded. Please wait a moment.');
+    throw new Error('Reddit Unhider: Servers are currently busy, please try again later.');
   }
 
-  const response = await fetch(url);
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 12000); // 12s timeout
+
+  let response;
+  try {
+    response = await fetch(url, { signal: controller.signal });
+  } catch (error: any) {
+    if (error.name === 'AbortError') {
+      throw new Error('Reddit Unhider: Servers are currently busy, please try again later.');
+    }
+    throw new Error('Reddit Unhider: Servers are currently busy, please try again later.');
+  } finally {
+    clearTimeout(timeoutId);
+  }
   
   const remaining = response.headers.get('X-RateLimit-Remaining');
   const reset = response.headers.get('X-RateLimit-Reset');
@@ -19,7 +32,10 @@ async function fetchWithRateLimit(url: string) {
   if (reset !== null) rateLimitResetTime = Date.now() + parseInt(reset, 10) * 1000;
 
   if (!response.ok) {
-    throw new Error(`API error: ${response.status}`);
+    if (response.status === 429 || response.status >= 500) {
+      throw new Error('Reddit Unhider: Servers are currently busy, please try again later.');
+    }
+    throw new Error('Reddit Unhider: Servers are currently busy, please try again later.');
   }
 
   return response.json();

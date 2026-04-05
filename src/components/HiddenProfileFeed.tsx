@@ -145,15 +145,20 @@ export default function HiddenProfileFeed({ username }: { username: string }) {
   return (
     <div>
       <div style={{
-        padding: '12px 16px', borderBottom: '1px solid var(--color-neutral-border-weak, #34454d)', backgroundColor: 'rgba(255, 69, 0, 0.05)'
+        padding: '12px 16px', borderBottom: '1px solid var(--color-neutral-border-weak)', backgroundColor: 'var(--color-neutral-background-weak)'
       }}>
-        <h2 style={{ color: '#ff4500', margin: 0, fontSize: '12px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-          Hidden profile activity shown by Reddit Unhider
+        <h2 style={{ color: 'var(--color-neutral-content-strong)', margin: 0, fontSize: '12px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <svg style={{ color: '#ff4500' }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+          <span>Hidden profile activity shown by <span style={{ color: '#ff4500' }}>Reddit Unhider</span></span>
         </h2>
       </div>
 
-      {error && <div style={{ padding: '24px', color: 'red' }}>Error: {error}</div>}
+      {error && (
+        <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', color: 'var(--color-neutral-content-strong)', marginTop: '24px' }}>
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--color-neutral-content-weak)' }}><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+          <span style={{ fontWeight: 600, fontSize: '16px' }}>{error}</span>
+        </div>
+      )}
 
       {!loading && !error && displayItems.length === 0 && (
         <div style={{ padding: '24px', color: 'var(--color-neutral-content-weak)' }}>No activity found.</div>

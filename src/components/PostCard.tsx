@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import DOMPurify from 'dompurify';
 import { RedditPost } from '../api/types';
 
 export default function PostCard({ post, username }: { post: RedditPost, username: string }) {
@@ -19,7 +20,7 @@ export default function PostCard({ post, username }: { post: RedditPost, usernam
 
   return (
     <div 
-      style={{ padding: '8px 16px', borderBottom: '1px solid var(--color-neutral-border-weak, #34454d)', backgroundColor: hovered ? 'var(--color-neutral-background-hover, #2a3236)' : 'transparent', transition: 'background-color 0.1s', cursor: 'pointer' }}
+      style={{ padding: '8px 16px', borderBottom: '1px solid var(--color-neutral-border-weak)', backgroundColor: hovered ? 'var(--color-neutral-background-hover)' : 'transparent', transition: 'background-color 0.1s', cursor: 'pointer' }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       onClick={(e) => {
@@ -34,14 +35,14 @@ export default function PostCard({ post, username }: { post: RedditPost, usernam
       }}
     >
       <div>
-        <div style={{ fontSize: '12px', display: 'flex', gap: '6px', color: 'var(--color-neutral-content-weak, #8da4ae)', marginBottom: '4px', alignItems: 'center' }}>
+        <div style={{ fontSize: '12px', display: 'flex', gap: '6px', color: 'var(--color-neutral-content-weak)', marginBottom: '4px', alignItems: 'center' }}>
           <img src="https://www.redditstatic.com/desktop2x/img/favicon/favicon-16x16.png" style={{width: 16, height: 16, borderRadius: '50%', transform: 'translateY(8.5px)'}} alt="Subreddit" />
           <a 
             href={`https://reddit.com/r/${post.subreddit}`} 
             onClick={(e) => e.stopPropagation()} 
             onMouseEnter={() => setSubHovered(true)}
             onMouseLeave={() => setSubHovered(false)}
-            style={{ fontWeight: 600, color: subHovered ? '#24a0ed' : 'var(--color-neutral-content-strong, #f2f4f5)', textDecoration: subHovered ? 'underline' : 'none', lineHeight: '16px' }}
+            style={{ fontWeight: 600, color: subHovered ? 'var(--color-primary-hover)' : 'var(--color-neutral-content-strong)', textDecoration: subHovered ? 'underline' : 'none', lineHeight: '16px' }}
           >
             r/{post.subreddit}
           </a>
@@ -49,7 +50,7 @@ export default function PostCard({ post, username }: { post: RedditPost, usernam
           <span style={{ lineHeight: '16px' }}>{renderTime(post.created_utc)}</span>
         </div>
         
-        <h3 style={{ fontSize: '16px', margin: '0 0 8px 0', fontWeight: 600, color: 'var(--color-neutral-content-strong, #f2f4f5)', lineHeight: 1.2 }}>
+        <h3 style={{ fontSize: '16px', margin: '0 0 8px 0', fontWeight: 600, color: 'var(--color-neutral-content-strong)', lineHeight: 1.2 }}>
           <a
             href={`https://reddit.com${post.permalink}`}
             style={aStyle}
@@ -72,19 +73,19 @@ export default function PostCard({ post, username }: { post: RedditPost, usernam
             <div 
               key={`selftext`}
               style={{ 
-                color: 'var(--color-neutral-content-strong, #f2f4f5)', 
+                color: 'var(--color-neutral-content-strong)', 
                 fontSize: '14px', 
                 maxHeight: '100px', 
                 overflow: 'hidden', 
                 textOverflow: 'ellipsis', 
                 WebkitMaskImage: 'linear-gradient(to bottom, black 50%, transparent 100%)' 
               }} 
-              dangerouslySetInnerHTML={{ __html: post.selftext }} 
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.selftext) }} 
             />
           </div>
         )}
 
-        <div style={{ display: 'flex', gap: '16px', color: 'var(--color-neutral-content-weak, #8da4ae)', fontSize: '12px', fontWeight: 600, alignItems: 'center', marginTop: '8px' }}>
+        <div style={{ display: 'flex', gap: '16px', color: 'var(--color-neutral-content-weak)', fontSize: '12px', fontWeight: 600, alignItems: 'center', marginTop: '8px' }}>
           <div style={{ display: 'flex', gap: '6px', alignItems: 'center', padding: '4px', cursor: 'pointer' }} onClick={() => window.location.href = `https://reddit.com${post.permalink}`}>
              <span style={{ fontSize: 16, fontWeight: 'normal' }}>💬</span>
              <span>{post.num_comments} Comments</span>
