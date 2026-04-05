@@ -13,6 +13,7 @@ export default function CommentCard({ comment, username }: { comment: RedditComm
   const [subHovered, setSubHovered] = useState(false);
   const [userHovered, setUserHovered] = useState(false);
   const [parentHovered, setParentHovered] = useState(false);
+  const [avatarIndex] = useState(() => Math.floor(Math.random() * 7));
   const htmlContent = comment.body_html ? decodeHtmlEntity(comment.body_html) : '';
 
   const renderTime = (utc: number) => {
@@ -68,7 +69,7 @@ export default function CommentCard({ comment, username }: { comment: RedditComm
       <div style={{ display: 'flex' }}>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginRight: '12px', minWidth: '28px' }}>
           <img 
-            src={`https://www.redditstatic.com/avatars/defaults/v2/avatar_default_${Math.floor(Math.random() * 7)}.png`} 
+            src={`https://www.redditstatic.com/avatars/defaults/v2/avatar_default_${avatarIndex}.png`} 
             alt="User Avatar" 
             style={{ width: '28px', height: '28px', borderRadius: '50%' }}
           />
