@@ -1,6 +1,12 @@
 node_modules
 dist
+dist-firefox
+web-ext-artifacts
 dist-tsc
 .env
 .env.local
 .DS_Store
+*.zip
+errors.log
+errors.txt
+errors_utf8.txt
