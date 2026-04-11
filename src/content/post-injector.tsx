@@ -253,12 +253,10 @@ function initInjector() {
     return document.body;
   };
 
-  const isTargetPostDeletedOrHidden = (id: string) => {
+  const isTargetPostDeletedOrHidden = () => {
     // 1. Is the native post visibly deleted/removed?
     const shredditPost = document.querySelector('shreddit-post');
     if (shredditPost) {
-      if (shredditPost.getAttribute('author') === '[deleted]') return true;
-      
       const html = shredditPost.innerHTML || '';
       if (html.includes('Removed by moderator') || 
           html.includes('deleted by the person who originally posted it') ||
@@ -273,40 +271,7 @@ function initInjector() {
   let currentPostId: string | null = null;
   let root: any = null;
 
-  const attemptInjection = () => {
-    const postId = getPostIdFromUrl();
-    
-    // If we navigated away from a post page, remove the injector
-    if (!postId) {
-      if (currentPostId !== null) {
-        currentPostId = null;
-        ['reddit-unhide-post-container', 'reddit-unhide-comments-container', 'reddit-unhide-archived-root'].forEach(id => {
-          const el = document.getElementById(id);
-          if (el) el.remove();
-        });
-        if (root) {
-          root.unmount();
-          root = null;
-        }
-      }
-      return;
-    }
-
-    // Only operate if the post is actually hidden or deleted!
-    if (!isTargetPostDeletedOrHidden(postId)) {
-      return;
-    }
-
-    // Hide native reddit comments tree if we are taking over
-    const nativeTree = document.querySelector('shreddit-comment-tree');
-    if (nativeTree) {
-      (nativeTree as HTMLElement).style.display = 'none';
-    }
-
-    // If already injected for this specific post, do nothing
-    if (document.getElementById('reddit-unhide-archived-root') && currentPostId === postId) return;
-
-    // If ID changed (SPA navigation between posts), remove old ones
+  const clearInjectedUi = () => {
     ['reddit-unhide-post-container', 'reddit-unhide-comments-container', 'reddit-unhide-archived-root'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.remove();
@@ -315,6 +280,40 @@ function initInjector() {
       root.unmount();
       root = null;
     }
+    currentPostId = null;
+  };
+
+  const setNativeCommentsVisible = (visible: boolean) => {
+    const nativeTree = document.querySelector('shreddit-comment-tree') as HTMLElement | null;
+    if (!nativeTree) return;
+    nativeTree.style.display = visible ? '' : 'none';
+  };
+
+  const attemptInjection = () => {
+    const postId = getPostIdFromUrl();
+    
+    // If we navigated away from a post page, remove the injector
+    if (!postId) {
+      clearInjectedUi();
+      setNativeCommentsVisible(true);
+      return;
+    }
+
+    // Only operate if the post is actually hidden or deleted!
+    if (!isTargetPostDeletedOrHidden()) {
+      clearInjectedUi();
+      setNativeCommentsVisible(true);
+      return;
+    }
+
+    // Hide native reddit comments tree if we are taking over
+    setNativeCommentsVisible(false);
+
+    // If already injected for this specific post, do nothing
+    if (document.getElementById('reddit-unhide-archived-root') && currentPostId === postId) return;
+
+    // If ID changed (SPA navigation between posts), remove old ones
+    clearInjectedUi();
 
     currentPostId = postId;
     const container = document.createElement('div');
