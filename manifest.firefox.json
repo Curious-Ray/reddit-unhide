@@ -1,0 +1,42 @@
+{
+  "manifest_version": 3,
+  "name": "Reddit Unhider",
+  "version": "1.0.2",
+  "description": "Seamlessly explore hidden user profiles, read deleted comments, and view removed posts natively within the Reddit interface.",
+  "icons": {
+    "16": "logo.png",
+    "32": "logo.png",
+    "48": "logo.png",
+    "128": "logo.png"
+  },
+  "host_permissions": [
+    "*://*.reddit.com/*",
+    "https://arctic-shift.photon-reddit.com/*"
+  ],
+  "permissions": [
+    "webNavigation"
+  ],
+  "background": {
+    "scripts": [
+      "src/background/index.ts"
+    ],
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.reddit.com/*"
+      ],
+      "js": [
+        "src/content/index.tsx",
+        "src/content/post-injector.tsx"
+      ]
+    }
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "reddit-unhider@siddh.dev",
+      "strict_min_version": "121.0"
+    }
+  }
+}
