@@ -1,6 +1,6 @@
 {
   "name": "reddit-unhider",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Seamlessly explore hidden user profiles, read deleted comments, and view removed posts natively within the Reddit interface.",
   "type": "module",
   "scripts": {
