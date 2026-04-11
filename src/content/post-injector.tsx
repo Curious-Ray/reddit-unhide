@@ -261,10 +261,19 @@ function initInjector() {
       if (html.includes('Removed by moderator') || 
           html.includes('deleted by the person who originally posted it') ||
           html.includes('Sorry, this post was removed by Reddit\'s filters') ||
-          html.includes('Sorry, this post was removed by the moderators')) {
+          html.includes('Sorry, this post was removed by the moderators') ||
+          html.toLowerCase().includes('comment deleted by user') ||
+          html.toLowerCase().includes('comments deleted by user')) {
           return true;
       }
     }
+
+    // Some Reddit layouts place the deletion notice outside shreddit-post.
+    const pageText = (document.body?.textContent || '').toLowerCase();
+    if (pageText.includes('comment deleted by user') || pageText.includes('comments deleted by user')) {
+      return true;
+    }
+
     return false;
   };
 

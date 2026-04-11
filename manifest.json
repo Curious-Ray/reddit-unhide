@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Reddit Unhider",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Seamlessly explore hidden user profiles, read deleted comments, and view removed posts natively within the Reddit interface.",
   "icons": {
     "16": "logo.png",

@@ -56,9 +56,15 @@ function checkForHiddenMessage() {
   if (document.getElementById('reddit-unhide-root')) return;
 
   console.log('[Reddit Unhider] Scanning for hidden profile message...');
-  
-  const searchStr = "likes to keep their";
-  const targetNode = findDeepestNodeWithText(searchStr);
+
+  const triggerPhrases = [
+    'likes to keep their',
+    'comment deleted by user',
+    'comments deleted by user'
+  ];
+  const targetNode = triggerPhrases
+    .map((phrase) => findDeepestNodeWithText(phrase))
+    .find((node) => node !== null) || null;
   
   if (targetNode) {
      console.log('[Reddit Unhider] Found hidden message element!', targetNode);
