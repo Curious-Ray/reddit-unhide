@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import DOMPurify from 'dompurify';
+
+function htmlToPlainText(input: string) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(input, 'text/html');
+  return (doc.body.textContent || '').trim();
+}
 
 function getPostIdFromUrl() {
   const match = window.location.pathname.match(/\/comments\/([a-zA-Z0-9]+)\//);
@@ -22,6 +27,9 @@ function getAvatarIndex(str: string) {
 function CommentNode({ node }: { node: any }) {
   const [collapsed, setCollapsed] = useState(false);
   const avatarIndex = getAvatarIndex(node.author);
+  const plainBody = node.body_html
+    ? htmlToPlainText(node.body_html)
+    : (node.body || '');
   // Dynamic reddit avatar based on username hash
   const avatarUrl = `https://www.redditstatic.com/avatars/defaults/v2/avatar_default_${avatarIndex}.png`;
 
@@ -104,7 +112,9 @@ function CommentNode({ node }: { node: any }) {
         {!collapsed && (
           <>
             {/* Body */}
-            <div style={{ color: 'var(--color-neutral-content-strong)', fontSize: '14px', lineHeight: '1.4', marginBottom: '8px', wordBreak: 'break-word', overflowWrap: 'break-word', whiteSpace: 'normal' }} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(node.body_html || (node.body ? node.body.replace(/\n/g, '<br/>') : '')) }} />
+            <div style={{ color: 'var(--color-neutral-content-strong)', fontSize: '14px', lineHeight: '1.4', marginBottom: '8px', wordBreak: 'break-word', overflowWrap: 'break-word', whiteSpace: 'pre-wrap' }}>
+              {plainBody}
+            </div>
             
             {/* Children container */}
             <div style={{ marginTop: '0px' }}>
@@ -121,6 +131,9 @@ function CommentNode({ node }: { node: any }) {
 
 function ArchivedPostBody({ postData }: { postData: any }) {
   if (!postData) return null;
+  const plainSelfText = postData.selftext_html
+    ? htmlToPlainText(postData.selftext_html)
+    : (postData.selftext || '');
   return (
     <div style={{
       margin: '16px 0', padding: '16px', border: '1px solid rgba(255, 69, 0, 0.4)',
@@ -141,8 +154,10 @@ function ArchivedPostBody({ postData }: { postData: any }) {
            rel="noreferrer"
          >{postData.author}</a> • {new Date(postData.created_utc * 1000).toLocaleString()}
       </div>
-      {postData.selftext && (
-        <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(postData.selftext_html || (postData.selftext ? postData.selftext.replace(/\n/g, '<br/>') : '')) }} style={{ fontSize: '14px', lineHeight: '1.4', wordBreak: 'break-word', whiteSpace: 'normal' }} />
+      {plainSelfText && (
+        <div style={{ fontSize: '14px', lineHeight: '1.4', wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
+          {plainSelfText}
+        </div>
       )}
     </div>
   );

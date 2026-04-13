@@ -31,6 +31,14 @@ if (Array.isArray(manifest.web_accessible_resources)) {
   });
 }
 
+if (manifest.background?.service_worker) {
+  throw new Error('Invalid Firefox build: background.service_worker is present in dist-firefox/manifest.json');
+}
+
+if (!Array.isArray(manifest.background?.scripts) || manifest.background.scripts.length === 0) {
+  throw new Error('Invalid Firefox build: background.scripts is missing in dist-firefox/manifest.json');
+}
+
 await writeFile(firefoxManifestPath, `${JSON.stringify(manifest, null, 2)}\n`, 'utf8');
 
 console.log('Firefox build ready in dist-firefox');

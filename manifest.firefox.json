@@ -4,10 +4,10 @@
   "version": "1.0.2",
   "description": "Seamlessly explore hidden user profiles, read deleted comments, and view removed posts natively within the Reddit interface.",
   "icons": {
-    "16": "logo.png",
-    "32": "logo.png",
-    "48": "logo.png",
-    "128": "logo.png"
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
   },
   "host_permissions": [
     "*://*.reddit.com/*",
@@ -36,7 +36,12 @@
   "browser_specific_settings": {
     "gecko": {
       "id": "reddit-unhider@siddh.dev",
-      "strict_min_version": "121.0"
+      "strict_min_version": "140.0",
+      "data_collection_permissions": {
+        "required": [
+          "none"
+        ]
+      }
     }
   }
 }

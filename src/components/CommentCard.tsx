@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import DOMPurify from 'dompurify';
 import { RedditComment } from '../api/types';
 
-function decodeHtmlEntity(html: string) {
-  const txt = document.createElement("textarea");
-  txt.innerHTML = html;
-  return txt.value;
+function htmlToPlainText(input: string) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(input, 'text/html');
+  return (doc.body.textContent || '').trim();
 }
 
 export default function CommentCard({ comment, username }: { comment: RedditComment, username: string }) {
@@ -14,7 +13,7 @@ export default function CommentCard({ comment, username }: { comment: RedditComm
   const [userHovered, setUserHovered] = useState(false);
   const [parentHovered, setParentHovered] = useState(false);
   const [avatarIndex] = useState(() => Math.floor(Math.random() * 7));
-  const htmlContent = comment.body_html ? decodeHtmlEntity(comment.body_html) : '';
+  const plainBody = comment.body_html ? htmlToPlainText(comment.body_html) : '';
 
   const renderTime = (utc: number) => {
      const diff = Math.floor(Date.now() / 1000) - utc;
@@ -112,7 +111,9 @@ export default function CommentCard({ comment, username }: { comment: RedditComm
             <span>{renderTime(comment.created_utc)}</span>
           </div>
 
-          <div style={{ color: 'var(--color-neutral-content-strong)', fontSize: '14px', margin: '4px 0 8px', pointerEvents: 'none', overflow: 'hidden' }} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(htmlContent) }} />
+          <div style={{ color: 'var(--color-neutral-content-strong)', fontSize: '14px', margin: '4px 0 8px', pointerEvents: 'none', overflow: 'hidden', whiteSpace: 'pre-wrap' }}>
+            {plainBody}
+          </div>
         </div>
       </div>
     </div>

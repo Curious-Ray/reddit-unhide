@@ -1,12 +1,18 @@
 import React, { useState } from 'react';
-import DOMPurify from 'dompurify';
 import { RedditPost } from '../api/types';
+
+function htmlToPlainText(input: string) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(input, 'text/html');
+  return (doc.body.textContent || '').trim();
+}
 
 export default function PostCard({ post, username }: { post: RedditPost, username: string }) {
   const [hovered, setHovered] = useState(false);
   const [subHovered, setSubHovered] = useState(false);
 
   const [expanded, setExpanded] = useState(false);
+  const plainSelfText = post.selftext ? htmlToPlainText(post.selftext) : '';
 
   const renderTime = (utc: number) => {
      const diff = Math.floor(Date.now() / 1000) - utc;
@@ -62,7 +68,7 @@ export default function PostCard({ post, username }: { post: RedditPost, usernam
           </a>
         </h3>
 
-        {post.selftext && (
+        {plainSelfText && (
           <div className="selftext-container" style={{ marginBottom: '8px', pointerEvents: 'none' }}>
             <div 
               key={`selftext`}
@@ -72,10 +78,12 @@ export default function PostCard({ post, username }: { post: RedditPost, usernam
                 maxHeight: '100px', 
                 overflow: 'hidden', 
                 textOverflow: 'ellipsis', 
+                whiteSpace: 'pre-wrap',
                 WebkitMaskImage: 'linear-gradient(to bottom, black 50%, transparent 100%)' 
-              }} 
-              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.selftext) }} 
-            />
+              }}
+            >
+              {plainSelfText}
+            </div>
           </div>
         )}
 
